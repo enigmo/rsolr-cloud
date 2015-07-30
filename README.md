@@ -1,6 +1,6 @@
-# Rsolr::Cloud
+# RSolr::Cloud
 
-TODO: Write a gem description
+The connection adopter supporting SolrCloud for RSolr.
 
 ## Installation
 
@@ -18,9 +18,27 @@ Or install it yourself as:
 
     $ gem install rsolr-cloud
 
-## Usage
+## Example
 
-TODO: Write usage instructions here
+```ruby
+require 'zk'
+require 'rsolr/cloud'
+
+# Create Zookeeper client for the Zookeeper ensemble in SolrCloud.
+zk = ZK.new('localhost:2181,localhost:2182,localhost:2183')
+
+# Connecting the SolrCloud through the Zookeeper.
+cloud_connection = RSolr::Cloud::Connection.new(zk)
+
+# Get rsolr client for solr_cloud.
+solr_client  = RSolr::Client.new(cloud_connection,
+                                 read_timeout: 60,
+                                 open_timeout: 60)
+
+# You can use rsolr as usual but collection: option must be specified with the name of the collection.
+response = solr.get('select', collection: 'collection1', params: {q: '*:*'})
+
+```
 
 ## Contributing
 

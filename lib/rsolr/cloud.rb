@@ -1,7 +1,3 @@
+require "rsolr/cloud/error"
+require "rsolr/cloud/connection"
 require "rsolr/cloud/version"
-
-module Rsolr
-  module Cloud
-    # Your code goes here...
-  end
-end
