@@ -9,7 +9,7 @@ class RSolr::Cloud::Connection < RSolr::Connection
     super()
     @zk = zk
     initialize_live_node_watcher
-    initialize_collection_state_watcher
+    initialize_collections_watcher
     update_urls
   end
 
@@ -46,13 +46,22 @@ class RSolr::Cloud::Connection < RSolr::Connection
     update_live_nodes
   end
 
-  def initialize_collection_state_watcher
+  def initialize_collections_watcher
     @zk.register(ZNODE_COLLECTIONS) do
       update_collections
       update_urls
     end
     update_collections
   end
+
+  def initialize_collection_state_watcher(collection)
+    @zk.register("/collections/#{collection}/state.json") do
+      update_collection_state(collection)
+      update_urls
+    end
+    update_collection_state(collection)
+  end
+
 
   def update_urls
     synchronize do
@@ -82,13 +91,25 @@ class RSolr::Cloud::Connection < RSolr::Connection
   end
 
   def update_collections
-    synchronize do
-      @collections = {}
-      @zk.children(ZNODE_COLLECTIONS, watch: true).map do |collection|
-        collection_state_path = "/collections/#{collection}/state.json"
-        collection_state_json, _ = @zk.get(collection_state_path)
-        @collections.merge!(JSON.parse(collection_state_json))
+    collections = @zk.children(ZNODE_COLLECTIONS, watch: true)
+    created_collections = []
+    synchronize do 
+      @collections ||={}
+      deleted_collections = @collections.keys - collections
+      created_collections = collections - @collections.keys
+      deleted_collections.each do |collection|
+        @collections.delete(collection)
       end
+    end
+    created_collections.each do |collection|
+      initialize_collection_state_watcher(collection)
+    end
+  end
+
+  def update_collection_state(collection)
+    synchronize do
+      collection_state_json, _ = @zk.get("/collections/#{collection}/state.json", watch: true)
+      @collections.merge!(JSON.parse(collection_state_json))
     end
   end
 
