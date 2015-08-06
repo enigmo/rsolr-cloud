@@ -20,4 +20,9 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "rspec", "~> 3.3"
+  spec.add_development_dependency 'activesupport', '~> 4.2'
+  spec.add_development_dependency 'zk-server', '~> 1.1.7'
+  spec.add_development_dependency "zk", "~> 1.9.5"
+  spec.add_development_dependency "rsolr", "~> 1.0.12"
 end
