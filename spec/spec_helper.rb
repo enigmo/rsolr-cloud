@@ -6,16 +6,44 @@ require 'zk'
 require 'zk-server'
 require 'rspec/expectations'
 
+module Helpers
+
+  def delete_with_children(zk, path)
+    children = zk.children(path).each do |node|
+      delete_with_children(zk, File.join(path, node))
+    end
+    zk.delete(path)
+  rescue ZK::Exceptions::NoNode
+  end
+
+  def wait_until(timeout = 10)
+    started_on = Time.now
+    result = false
+    loop do
+      result = yield
+      break if result || started_on < timeout.second.ago
+      Thread.pass
+    end
+    unless result
+      raise "Timed out"
+    end
+  end
+
+end
+
+
 RSpec.configure do |config|
 
-  config.before(:suite) do 
+  config.include Helpers
+
+  config.before(:suite) do
     ZK::Server.run do |c|
       c.force_sync = false
     end
   end
 
   config.after(:suite) do
-    ZK::Server.shutdown
+    ZK::Server.server.clobber!
   end
 
 end
@@ -28,13 +56,19 @@ end
 
 RSpec::Matchers.define :become_soon do |expected|
   match do |actual|
-    while(actual.call != expected) do
-      Thread.pass
+    begin
+      wait_until do
+        actual.call == expected
+      end
+    rescue
+      false
+    else
+      true
     end
-    true
   end
+
   def supports_block_expectations?
     true
   end
-end
 
+end

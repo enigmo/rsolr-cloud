@@ -93,7 +93,7 @@ class RSolr::Cloud::Connection < RSolr::Connection
   def update_collections
     collections = @zk.children(ZNODE_COLLECTIONS, watch: true)
     created_collections = []
-    synchronize do 
+    synchronize do
       @collections ||={}
       deleted_collections = @collections.keys - collections
       created_collections = collections - @collections.keys
