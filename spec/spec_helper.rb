@@ -7,9 +7,8 @@ require 'zk-server'
 require 'rspec/expectations'
 
 module Helpers
-
   def delete_with_children(zk, path)
-    children = zk.children(path).each do |node|
+    zk.children(path).each do |node|
       delete_with_children(zk, File.join(path, node))
     end
     zk.delete(path)
@@ -24,28 +23,20 @@ module Helpers
       break if result || started_on < timeout.second.ago
       Thread.pass
     end
-    unless result
-      raise "Timed out"
-    end
+    fail 'Timed out' unless result
   end
-
 end
 
-
 RSpec.configure do |config|
-
   config.include Helpers
-
   config.before(:suite) do
     ZK::Server.run do |c|
       c.force_sync = false
     end
   end
-
   config.after(:suite) do
     ZK::Server.server.clobber!
   end
-
 end
 
 RSpec::Matchers.define :be_one_of do |expected|
