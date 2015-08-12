@@ -48,6 +48,10 @@ RSpec.describe RSolr::Cloud::Connection do
       expect(port).to eq(8983)
       http
     end
+    expect(http).to receive(:request) do |request|
+      expect(request.path).to eq('/solr/collection1/select?q=*:*')
+      double.as_null_object
+    end
     @subject.execute client, collection: 'collection1', method: :get, path: 'select', query: 'q=*:*'
   end
 
@@ -64,7 +68,12 @@ RSpec.describe RSolr::Cloud::Connection do
       expect(port).to eq(8983)
       http
     end
-    @subject.execute client, collection: 'collection1', method: :post, path: 'update'
+    expect(http).to receive(:request) do |request|
+      expect(request.path).to eq('/solr/collection1/update')
+      expect(request.body).to eq('the data')
+      double.as_null_object
+    end
+    @subject.execute client, collection: 'collection1', method: :post, path: 'update', data: 'the data'
   end
 
   it 'should remove downed replica node and add recovered node' do

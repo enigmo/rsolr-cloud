@@ -19,7 +19,8 @@ module RSolr
         collection_name = request_context[:collection]
         fail 'The :collection option must be specified.' unless collection_name
         path = request_context[:path].to_s
-        query = request_context[:query] ? "?#{query}" : ''
+        query = request_context[:query]
+        query = query ? "?#{query}" : ''
         url = get_url(collection_name, leader_only: path == 'update')
         fail RSolr::Cloud::Error::NotEnoughNodes unless url
         request_context[:uri] = RSolr::Uri.create(url).merge(path + query)
