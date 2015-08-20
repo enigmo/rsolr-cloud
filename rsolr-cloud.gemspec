@@ -6,8 +6,8 @@ require 'rsolr/cloud/version'
 Gem::Specification.new do |spec|
   spec.name          = "rsolr-cloud"
   spec.version       = Rsolr::Cloud::VERSION
-  spec.authors       = ["Kimura"]
-  spec.email         = ["kimura@enigmo.co.jp"]
+  spec.authors       = ["Shintaro Kimura"]
+  spec.email         = ["service@enigmo.co.jp"]
   spec.summary       = %q{The connection adopter supporting SolrCloud for RSolr}
   spec.description   = %q{The connection adopter supporting SolrCloud for RSolr}
   spec.homepage      = ""
