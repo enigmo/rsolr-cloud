@@ -21,7 +21,7 @@ module RSolr
         path  = request_context[:path].to_s
         query = request_context[:query]
         query = query ? "?#{query}" : ''
-        url   = select_node(collection_name, leader_only: path == 'update')
+        url   = select_node(collection_name, path == 'update')
         fail RSolr::Cloud::Error::NotEnoughNodes unless url
         request_context[:uri] = RSolr::Uri.create(url).merge(path + query)
         super(client, request_context)
@@ -29,7 +29,7 @@ module RSolr
 
       private
 
-      def select_node(collection, leader_only: false)
+      def select_node(collection, leader_only=false)
         if leader_only
           synchronize { @leader_urls[collection].to_a.sample }
         else
