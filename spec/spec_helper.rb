@@ -12,7 +12,8 @@ module Helpers
       delete_with_children(zk, File.join(path, node))
     end
     zk.delete(path)
-  rescue ZK::Exceptions::NoNode
+  rescue ZK::Exceptions::NoNode # rubocop:disable HandleExceptions
+    # don't care if it already exists or not.
   end
 
   def wait_until(timeout = 10)
@@ -23,7 +24,7 @@ module Helpers
       break if result || started_on < timeout.second.ago
       Thread.pass
     end
-    fail 'Timed out' unless result
+    raise 'Timed out' unless result
   end
 end
 
@@ -61,5 +62,4 @@ RSpec::Matchers.define :become_soon do |expected|
   def supports_block_expectations?
     true
   end
-
 end

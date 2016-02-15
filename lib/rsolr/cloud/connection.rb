@@ -1,11 +1,12 @@
 module RSolr
+  # rubocop:disable Metrics/ClassLength
   module Cloud
     # RSolr connection adapter for SolrCloud
     class Connection < RSolr::Connection
       include MonitorMixin
 
-      ZNODE_LIVE_NODES  = '/live_nodes'
-      ZNODE_COLLECTIONS = '/collections'
+      ZNODE_LIVE_NODES  = '/live_nodes'.freeze
+      ZNODE_COLLECTIONS = '/collections'.freeze
 
       def initialize(zk)
         super()
@@ -17,19 +18,19 @@ module RSolr
 
       def execute(client, request_context)
         collection_name = request_context[:collection]
-        fail 'The :collection option must be specified.' unless collection_name
+        raise 'The :collection option must be specified.' unless collection_name
         path  = request_context[:path].to_s
         query = request_context[:query]
         query = query ? "?#{query}" : ''
         url   = select_node(collection_name, path == 'update')
-        fail RSolr::Cloud::Error::NotEnoughNodes unless url
+        raise RSolr::Cloud::Error::NotEnoughNodes unless url
         request_context[:uri] = RSolr::Uri.create(url).merge(path + query)
         super(client, request_context)
       end
 
       private
 
-      def select_node(collection, leader_only=false)
+      def select_node(collection, leader_only = false)
         if leader_only
           synchronize { @leader_urls[collection].to_a.sample }
         else
@@ -66,7 +67,9 @@ module RSolr
           @all_urls = {}
           @leader_urls = {}
           @collections.each do |name, state|
+            # rubocop:disable SpaceAroundOperators
             @all_urls[name], @leader_urls[name] = available_urls(name, state)
+            # rubocop:enable SpaceAroundOperators
           end
         end
       end
