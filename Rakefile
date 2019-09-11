@@ -5,6 +5,6 @@ begin
   RSpec::Core::RakeTask.new(:spec)
   require 'rubocop/rake_task'
   RuboCop::RakeTask.new
-  task default: [:rubocop, :spec]
+  task default: %i[rubocop spec]
 rescue LoadError # rubocop:disable HandleExceptions
 end
