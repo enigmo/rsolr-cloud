@@ -25,5 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'zk-server', '~> 1.1.7'
   spec.add_development_dependency 'zk', '~> 1.9.5'
   spec.add_development_dependency 'rsolr', '~> 1.0.12'
-  spec.add_development_dependency 'rubocop', '~> 0.37.1'
+  spec.add_development_dependency 'rubocop', '~> 0.49.0'
 end
