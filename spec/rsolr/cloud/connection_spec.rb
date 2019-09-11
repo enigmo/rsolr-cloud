@@ -1,5 +1,6 @@
 require 'spec_helper.rb'
 
+# rubocop:disable Metrics/BlockLength
 RSpec.describe RSolr::Cloud::Connection do
   before do
     @zk_in_solr = ZK.new
@@ -17,11 +18,10 @@ RSpec.describe RSolr::Cloud::Connection do
     ['192.168.1.21:8983_solr',
      '192.168.1.22:8983_solr',
      '192.168.1.23:8983_solr',
-     '192.168.1.24:8983_solr'
-    ].each do |node|
+     '192.168.1.24:8983_solr'].each do |node|
       @zk_in_solr.create("/live_nodes/#{node}", '', mode: :ephemeral)
     end
-    %w(collection1 collection2).each do |collection|
+    %w[collection1 collection2].each do |collection|
       @zk_in_solr.create("/collections/#{collection}")
       json = File.read("spec/files/#{collection}_all_nodes_alive.json")
       @zk_in_solr.create("/collections/#{collection}/state.json",
@@ -39,12 +39,14 @@ RSpec.describe RSolr::Cloud::Connection do
   it 'should configure Net::HTTP with one of active node in select request.' do
     expect(@subject.instance_variable_get(:@leader_urls)['collection1'].sort).to eq(
       ['http://192.168.1.22:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect(@subject.instance_variable_get(:@all_urls)['collection1'].sort).to eq(
       ['http://192.168.1.21:8983/solr/collection1',
        'http://192.168.1.22:8983/solr/collection1',
        'http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect(Net::HTTP).to receive(:new) do |host, port|
       expect(host).to be_one_of(['192.168.1.21', '192.168.1.22', '192.168.1.23', '192.168.1.24'])
       expect(port).to eq(8983)
@@ -60,12 +62,14 @@ RSpec.describe RSolr::Cloud::Connection do
   it 'should configure Net::HTTP with one of leader node in update request' do
     expect(@subject.instance_variable_get(:@leader_urls)['collection1'].sort).to eq(
       ['http://192.168.1.22:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect(@subject.instance_variable_get(:@all_urls)['collection1'].sort).to eq(
       ['http://192.168.1.21:8983/solr/collection1',
        'http://192.168.1.22:8983/solr/collection1',
        'http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect(Net::HTTP).to receive(:new) do |host, port|
       expect(host).to be_one_of(['192.168.1.22', '192.168.1.24'])
       expect(port).to eq(8983)
@@ -88,22 +92,26 @@ RSpec.describe RSolr::Cloud::Connection do
                     File.read('spec/files/collection1_replica_down.json'))
     expect { @subject.instance_variable_get(:@leader_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.22:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect { @subject.instance_variable_get(:@all_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.22:8983/solr/collection1',
        'http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     @zk_in_solr.create('/live_nodes/192.168.1.21:8983_solr', mode: :ephemeral)
     @zk_in_solr.set('/collections/collection1/state.json',
                     File.read('spec/files/collection1_all_nodes_alive.json'))
     expect { @subject.instance_variable_get(:@leader_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.22:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect { @subject.instance_variable_get(:@all_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.21:8983/solr/collection1',
        'http://192.168.1.22:8983/solr/collection1',
        'http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
   end
 
   it 'should remove downed leader node and add recovered node' do
@@ -112,22 +120,26 @@ RSpec.describe RSolr::Cloud::Connection do
                     File.read('spec/files/collection1_leader_down.json'))
     expect { @subject.instance_variable_get(:@leader_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect { @subject.instance_variable_get(:@all_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.21:8983/solr/collection1',
        'http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     @zk_in_solr.create('/live_nodes/192.168.1.22:8983_solr', mode: :ephemeral)
     @zk_in_solr.set('/collections/collection1/state.json',
                     File.read('spec/files/collection1_all_nodes_alive.json'))
     expect { @subject.instance_variable_get(:@leader_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.22:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect { @subject.instance_variable_get(:@all_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.21:8983/solr/collection1',
        'http://192.168.1.22:8983/solr/collection1',
        'http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
   end
 
   it 'should remove recovering leader node and add recovered node' do
@@ -135,21 +147,25 @@ RSpec.describe RSolr::Cloud::Connection do
                     File.read('spec/files/collection1_leader_recovering.json'))
     expect { @subject.instance_variable_get(:@leader_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect { @subject.instance_variable_get(:@all_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.21:8983/solr/collection1',
        'http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     @zk_in_solr.set('/collections/collection1/state.json',
                     File.read('spec/files/collection1_all_nodes_alive.json'))
     expect { @subject.instance_variable_get(:@leader_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
     expect { @subject.instance_variable_get(:@all_urls)['collection1'].sort }.to become_soon(
       ['http://192.168.1.21:8983/solr/collection1',
        'http://192.168.1.22:8983/solr/collection1',
        'http://192.168.1.23:8983/solr/collection1',
-       'http://192.168.1.24:8983/solr/collection1'].sort)
+       'http://192.168.1.24:8983/solr/collection1'].sort
+    )
   end
 
   it 'should add new created collection.' do
@@ -173,4 +189,4 @@ RSpec.describe RSolr::Cloud::Connection do
     @zk_in_solr.close if @zk_in_solr
     @zk.close         if @zk
   end
-end
+end # rubocop:enable Metrics/BlockLength

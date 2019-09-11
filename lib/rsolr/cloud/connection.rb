@@ -67,9 +67,7 @@ module RSolr
           @all_urls = {}
           @leader_urls = {}
           @collections.each do |name, state|
-            # rubocop:disable SpaceAroundOperators
             @all_urls[name], @leader_urls[name] = available_urls(name, state)
-            # rubocop:enable SpaceAroundOperators
           end
         end
       end
